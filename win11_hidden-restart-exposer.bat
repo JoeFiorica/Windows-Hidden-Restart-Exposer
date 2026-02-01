@@ -1,54 +1,24 @@
 @echo off
 setlocal enabledelayedexpansion
-title Windows Update Reboot Control
+title Windows Update Reboot Status Check
 cls
 
 echo ==========================================
-echo   Windows Update Reboot Control
+echo   Windows Update Reboot Status Check
 echo ==========================================
 echo.
-echo 1) Force Windows Update finalize + check status
-echo 2) Check status ONLY (no update actions)
+echo This script ONLY checks update / reboot state.
+echo No update actions will be triggered.
 echo.
-set /p CHOICE=Select option [1-2]: 
-
-if "%CHOICE%"=="1" goto FULL
-if "%CHOICE%"=="2" goto CHECK
-
-echo Invalid selection.
-pause
-exit /b 1
 
 :: -------------------------------------------------
-:FULL
-echo.
-echo MODE: FULL (Force update surfacing + status check)
-goto REQUIRE_ADMIN
-
+:: REQUIRE ADMIN
 :: -------------------------------------------------
-:CHECK
-echo.
-echo MODE: CHECK ONLY
-goto REQUIRE_ADMIN
-
-:: -------------------------------------------------
-:REQUIRE_ADMIN
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo ERROR: Run this script as Administrator.
     pause
     exit /b 1
-)
-
-if "%CHOICE%"=="1" (
-    echo.
-    echo Triggering Windows Update surfacing...
-    usoclient StartScan
-    timeout /t 3 >nul
-    usoclient StartDownload
-    timeout /t 3 >nul
-    usoclient StartInstall
-    timeout /t 3 >nul
 )
 
 goto STATUS
@@ -126,7 +96,7 @@ if %MUSO_ENFORCEMENT%==1 (
 )
 
 :: ================================
-:: ENFORCEMENT INTERPRETATION
+:: FINAL INTERPRETATION
 :: ================================
 echo.
 echo ==========================================

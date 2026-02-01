@@ -1,6 +1,9 @@
 # Windows Hidden Restart Exposer
 
 A Windows 11 utility that **checks Windows Update servicing state relevant to restart enforcement** and **exposes hidden, planned restarts**
+
+This tool surfaces **OS-enforced restart conditions** *before* Windows is legally allowed to force them.
+
 — including the exact servicing path that produces:
 
 ```
@@ -31,6 +34,9 @@ This tool reveals **OS-enforced restart conditions** *before* Windows is allowed
 
 ## What This Tool Does *Not* Do
 
+- ❌ Does not scan for updates
+- ❌ Does not download or install updates
+- ❌ Does not trigger Windows Update activity
 - ❌ Does not reboot the system
 - ❌ Does not block or disable Windows Update
 - ❌ Does not modify servicing, update, or policy state
@@ -63,19 +69,14 @@ Run as **Administrator**:
 windows_hidden_restart_exposer.bat
 ```
 
-### Menu
-
-```
-1) Check for updates and expose hidden planned restarts
-2) Check ONLY for hidden planned restart enforcement
-```
+The script performs a **status-only diagnostic pass** and exits after displaying results.
 
 ---
 
 ## Output Interpretation
 
 ### Normal reboot required
-User-controlled. Windows will wait for the user to reboot.
+User-controlled. Windows will wait indefinitely for the user to reboot.
 
 ### Hidden planned restart detected
 A servicing update is already installed and Windows **may enforce a restart**:
