@@ -1,6 +1,6 @@
 # Windows Hidden Restart Exposer
 
-A Windows 11 utility that **checks Windows Update servicing state relevant to restart enforcement** and **exposes hidden, planned restarts**
+A Windows 11 utility that **checks Windows Update servicing state relevant to restart enforcement** and **exposes hidden, planned restarts**.
 
 This tool surfaces **OS-enforced restart conditions** *before* Windows is legally allowed to force them.
 
@@ -11,8 +11,6 @@ MoUsoCoreWorker.exe
 Operating System: Service pack (Planned)
 Reason Code: 0x80020010
 ```
-
-This tool reveals **OS-enforced restart conditions** *before* Windows is allowed to force them.
 
 > “Hidden” refers specifically to **Windows Update servicing restarts managed by Update Orchestrator (MoUSO)**, not user-initiated or application-driven reboots.
 
@@ -46,16 +44,54 @@ Generic reboot-required indicators are intentionally excluded, as they do **not*
 
 ---
 
+## Related Windows Policy Behavior (Critical)
+
+### Group Policy: No Auto-Restart With Logged-On Users
+
+Windows includes a Group Policy setting that **prevents any automatic restart while a user is logged on**, including **MoUSO / Update Orchestrator planned restarts**.
+
+**Policy path:**
+```
+Computer Configuration
+ └─ Administrative Templates
+    └─ Windows Components
+       └─ Windows Update
+          └─ No auto-restart with logged on users for scheduled automatic updates installations
+```
+
+**Registry equivalent:**
+```
+HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU
+NoAutoRebootWithLoggedOnUsers = 1 (DWORD)
+```
+
+### What this policy DOES
+- ✅ Blocks **all automatic restarts** while a user session exists
+- ✅ Applies to **classic Windows Update** restarts
+- ✅ Applies to **MoUSO / Update Orchestrator planned restarts**
+- ✅ Forces Windows to wait for a **user-initiated reboot or logoff**
+
+### Policy limitations
+- ❗ This policy **does not prevent restarts once no user is logged in**
+- ❗ If enforcement exists and the user logs out, Windows **may restart immediately**
+- ❗ Headless, kiosk, or shared systems remain vulnerable once sessions end
+
+**Key point:**  
+This policy is effective, but **conditional**.  
+This tool exists to expose **when enforcement is armed**, so administrators know **when logging out becomes dangerous**.
+
+---
+
 ## Why This Exists
 
 Windows Update pause:
 - stops downloads and new offers
-- does **not** stop servicing enforcement
+- does **not** remove already-installed servicing enforcement
 
 Hidden servicing updates can:
 - survive multiple reboots
 - remain invisible in the Windows Update UI
-- later be enforced by `MoUsoCoreWorker.exe` after a deadline
+- later be enforced by `MoUsoCoreWorker.exe` once conditions are met
 
 This tool makes that otherwise opaque state explicit.
 
@@ -79,9 +115,9 @@ The script performs a **status-only diagnostic pass** and exits after displaying
 User-controlled. Windows will wait indefinitely for the user to reboot.
 
 ### Hidden planned restart detected
-A servicing update is already installed and Windows **may enforce a restart**:
-- after pause expiry (if updates are paused)
-- outside active hours or when enforcement conditions are met (if not paused)
+A servicing update is already installed and Windows **will restart automatically once allowed**:
+- immediately after user logoff, **or**
+- after pause expiry and outside enforcement constraints
 
 ---
 
